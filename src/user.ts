@@ -44,6 +44,15 @@ export class User {
         });
     }
 
+    play() {
+        // TODO: probably justn have a function on socket
+        if (this.state !== State.Connected) {
+            throw new Error("Socket isn't connected");
+        }
+
+        this.socket.push("start");
+    }
+
     turn(): Promise<Move> {
         // TODO: probably justn have a function on socket
         if (this.state !== State.Connected) {

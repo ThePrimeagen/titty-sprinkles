@@ -7,19 +7,25 @@ type Users = [User, User, User, User];
 
 export class Game {
     private users: Users;
-    private current: number;
     private board: Board;
 
     constructor(sockets: Sockets) {
-        this.current = 0;
         this.users = sockets.map(x => new User(x)) as Users;
         this.board = new Board();
     }
 
-    play() {
+    async play() {
 
         let current = 0;
+        this.users.forEach(u => u.play());
+
         do {
+            const user = this.users[current];
+            const move = await user.turn();
+
+            if (this.board.move(current, move.piece, move.position)) {
+                current = (current + 1) % 4;
+            }
 
         } while (!this.board.gameOver());
 
