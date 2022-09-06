@@ -1,5 +1,5 @@
 import { Board } from "./board";
-import { Socket } from "./sockets/socket";
+import { Socket } from "./socket";
 import { User } from "./user";
 
 type Sockets = [Socket, Socket, Socket, Socket];

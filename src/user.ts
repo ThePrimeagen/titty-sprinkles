@@ -1,5 +1,5 @@
 import { PieceType } from "./board";
-import { Socket, State } from "./sockets/socket";
+import { ISocket, State } from "./socket";
 
 export type Move = {
     position: [number, number],
@@ -26,7 +26,7 @@ export class User {
     private rej?: (err?: any) => void;
     private state?: State;
 
-    constructor(private socket: Socket) {
+    constructor(private socket: ISocket) {
         socket.onStateChange((_: State, next: State) => {
             this.state = next;
             if (this.res) {

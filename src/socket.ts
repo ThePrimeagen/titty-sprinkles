@@ -17,6 +17,13 @@ export enum State {
     Error,
 }
 
+export interface ISocket {
+    state: State;
+    onStateChange(cb: (prev: State, next: State) => void): void;
+    onMessage(cb: (message: string) => void): void;
+    push(msg: string): Promise<void>;
+}
+
 export class Socket {
     private ws: WebSocket;
     public state: State;
