@@ -1,8 +1,8 @@
 import { Board } from "./board";
-import { Socket } from "./socket";
+import { ISocket } from "./socket";
 import { User } from "./user";
 
-type Sockets = [Socket, Socket, Socket, Socket];
+type Sockets = [ISocket, ISocket, ISocket, ISocket];
 type Users = [User, User, User, User];
 
 export class Game {

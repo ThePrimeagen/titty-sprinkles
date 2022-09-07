@@ -1,29 +1,32 @@
-
 export enum PieceType {
     Small,
     Medium,
     Big,
 }
 
-type BoardPiece = {
-    player: number,
-    type: PieceType,
-}
-
+type BoardPiece = Record<PieceType, number>;
 type BoardLine = [BoardPiece, BoardPiece, BoardPiece];
 
 export type Position = [number, number];
+function serializePiece(piece: BoardPiece): number {
+    // Does for ... of / object.values order it according to S, M, B?
+    return [PieceType.Small, PieceType.Medium, PieceType.Big].reduce((acc, type, i) => {
+        return acc | (piece[type] + 1) << (i * 3);
+    }, 0);
+}
 
 export class Board {
-    private board: BoardPiece[][];
+    public board: BoardPiece[][];
+
     private finished: boolean;
 
     constructor() {
         this.board = new Array(3);
         for (let i = 0; i < 3; ++i) {
             this.board[i] = new Array(3).fill(0).map(_ => ({
-                player: -1,
-                type: PieceType.Big,
+                [PieceType.Small]: -1,
+                [PieceType.Medium]: -1,
+                [PieceType.Big]: -1,
             }));
         }
 
@@ -33,12 +36,12 @@ export class Board {
     move(player: number, piece: PieceType, pos: Position): boolean {
         const [y, x] = pos;
         const p = this.board[y][x];
-        if (p.player !== -1) {
+
+        if (p[piece] !== -1) {
             return false;
         }
 
-        p.player = player;
-        p.type = piece;
+        p[piece] = player;
 
         this.finished = this.checkForWin(player, pos);
 
@@ -93,7 +96,7 @@ export class Board {
     private hasWin(player: number, pieces: BoardLine): boolean {
         for (let idx = 0; idx < this.wins.length; ++idx) {
             const win = this.wins[idx];
-            if (win.every((p, i) => pieces[i].player === player && pieces[i].type === p)) {
+            if (win.every((p, i) => pieces[i][p] === player)) {
                 return true;
             }
         }

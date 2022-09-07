@@ -1,0 +1,25 @@
+/*
+import { Game } from "../game";
+import { mockSocket, StateData } from "../mock/socket";
+import { ISocket } from "../socket";
+
+test("the game loop", async function() {
+    const [sockets, states] = [
+        mockSocket(),
+        mockSocket(),
+        mockSocket(),
+        mockSocket(),
+    ].reduce<[ISocket[], StateData[]]>((acc, mock) => {
+        acc[0].push(mock[0]);
+        acc[1].push(mock[1]);
+
+        return acc;
+    }, [[], []]) as any as [[ISocket, ISocket, ISocket, ISocket], StateData[]];
+
+    const game = new Game(sockets);
+    await game.play();
+
+});
+
+*/
+export {}

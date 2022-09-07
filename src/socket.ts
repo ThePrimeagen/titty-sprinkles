@@ -12,7 +12,6 @@ import WebSocket from "ws";
 
 export enum State {
     Connected,
-    Connecting,
     Done,
     Error,
 }
@@ -21,28 +20,23 @@ export interface ISocket {
     state: State;
     onStateChange(cb: (prev: State, next: State) => void): void;
     onMessage(cb: (message: string) => void): void;
-    push(msg: string): Promise<void>;
+    push(msg: string | object): Promise<void>;
 }
 
 export class Socket {
-    private ws: WebSocket;
     public state: State;
 
     private msgCallback!: (msg: string) => void;
     private stateChange!: (prev: State, state: State) => void;
 
-    constructor(addr: string) {
-        this.ws = new WebSocket(addr);
-        this.state = State.Connecting;
-        this.ws.on("open", () => {
-            this.setState(State.Connected);
-        });
+    constructor(private ws: WebSocket) {
+        this.state = State.Connected;
 
         this.ws.on("close", () => {
             this.setState(State.Done);
         });
 
-        this.ws.on("error", () => {
+        this.ws.on("error", (_e) => {
             this.setState(State.Error);
         });
 
@@ -65,7 +59,11 @@ export class Socket {
         this.msgCallback = cb;
     }
 
-    push(msg: string): Promise<void> {
+    push(msg: string | object): Promise<void> {
+        if (typeof msg === "object") {
+            msg = JSON.stringify(msg);
+        }
+
         return new Promise((res, err) => {
             this.ws.send(msg, (e?: Error) => {
                 if (e) {

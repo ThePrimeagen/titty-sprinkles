@@ -1,4 +1,4 @@
-import { PieceType } from "./board";
+import { Board, PieceType } from "./board";
 import { ISocket, State } from "./socket";
 
 export type Move = {
@@ -21,14 +21,19 @@ function explodePromise<T>(): {res: (val: T | PromiseLike<T>) => void, rej: (e?:
     };
 }
 
+enum MessageType {
+    GameStart,
+    YourTurn,
+}
+
 export class User {
     private res?: (val: Move | PromiseLike<Move>) => void;
     private rej?: (err?: any) => void;
-    private state?: State;
+
+    public pieces: [number, number, number];
 
     constructor(private socket: ISocket) {
         socket.onStateChange((_: State, next: State) => {
-            this.state = next;
             if (this.res) {
                 if (next === State.Error) {
                     this.reject("socket is errored");
@@ -42,24 +47,30 @@ export class User {
         socket.onMessage((msg: string) => {
             this.resolve(JSON.parse(msg) as Move);
         });
+
+        this.pieces = [3, 3, 3];
     }
 
     play() {
+
         // TODO: probably justn have a function on socket
-        if (this.state !== State.Connected) {
+        if (this.socket.state !== State.Connected) {
             throw new Error("Socket isn't connected");
         }
 
-        this.socket.push("start");
+        this.socket.push({
+            type: MessageType.GameStart
+        });
     }
 
-    turn(): Promise<Move> {
+    turn(board: Board): Promise<Move> {
         // TODO: probably justn have a function on socket
-        if (this.state !== State.Connected) {
+        if (this.socket.state !== State.Connected) {
             throw new Error("Socket isn't connected");
         }
 
-        this.socket.push("your turn");
+        this.socket.push({
+        });
 
         const {res, rej, promise} = explodePromise<Move>();
         this.res = res;
