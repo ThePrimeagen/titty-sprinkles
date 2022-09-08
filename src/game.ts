@@ -21,15 +21,25 @@ export class Game {
 
         do {
             const user = this.users[current];
-            const move = await user.turn();
+            const move = await user.turn(this.board);
 
-            if (this.board.move(current, move.piece, move.position)) {
+            if (move.position[0] === -1) {
                 current = (current + 1) % 4;
+                continue;
+            }
+
+            if (this.board.move(current, move.piece, move.position) &&
+                user.pieces[move.piece] > 0) {
+
+                current = (current + 1) % 4;
+                user.pieces[move.piece]--;
             }
 
         } while (!this.board.gameOver());
 
-        this.users.forEach((u, i) => u.done(i === current));
+        this.users.forEach((u, i) => {
+            u.done(i === this.board.winner);
+        });
     }
 
 }

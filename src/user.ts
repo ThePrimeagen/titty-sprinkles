@@ -22,8 +22,8 @@ function explodePromise<T>(): {res: (val: T | PromiseLike<T>) => void, rej: (e?:
 }
 
 enum MessageType {
-    GameStart,
-    YourTurn,
+    GameStart = "GameStart",
+    YourTurn = "YourTurn",
 }
 
 export class User {
@@ -48,7 +48,11 @@ export class User {
             this.resolve(JSON.parse(msg) as Move);
         });
 
-        this.pieces = [3, 3, 3];
+        this.pieces = [
+            3,
+            3,
+            3
+        ]
     }
 
     play() {
@@ -70,6 +74,9 @@ export class User {
         }
 
         this.socket.push({
+            type: MessageType.YourTurn,
+            board: board.board,
+            user: this.pieces,
         });
 
         const {res, rej, promise} = explodePromise<Move>();

@@ -1,3 +1,6 @@
+/*
+import { Board } from "./board";
+
 export enum Serialize {
     Buffer,
     JSON,
@@ -16,3 +19,5 @@ export function serialize(): Serialize {
     return serialization;
 }
 
+*/
+export {}
