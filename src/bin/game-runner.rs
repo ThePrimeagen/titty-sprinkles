@@ -150,7 +150,6 @@ async fn run_player(args: &'static Args, player: usize) -> Result<bool> {
                 return Ok(false);
             }
             if msg == "GIGACHAD" {
-                warn!("{}: msg GIGACHAD", player);
                 return Ok(true);
             }
             match serde_json::from_str(msg)? {
@@ -205,8 +204,6 @@ async fn play(args: &'static Args) -> Result<Vec<bool>> {
         .map(|x| *x)
         .collect::<Vec<bool>>();
 
-    warn!("game finished: {:?}", out);
-
     return Ok(out);
 }
 
@@ -220,8 +217,7 @@ async fn main() -> Result<()> {
     let mut handles = vec![];
 
     warn!("args {:?}", args);
-    for i in 0..args.games {
-        warn!("loop {}", i);
+    for _ in 0..args.games {
         let semaphore = semaphore.clone();
         let permit = semaphore.acquire_owned().await?;
 
@@ -243,7 +239,7 @@ async fn main() -> Result<()> {
         }));
     }
 
-    println!("{:?}", winners.lock().await);
+    warn!("{:?}", winners.lock().await);
 
     futures::future::join_all(handles).await;
 

@@ -55,25 +55,29 @@ export class User {
         ]
     }
 
-    play() {
+    async play() {
 
         // TODO: probably justn have a function on socket
         if (this.socket.state !== State.Connected) {
             throw new Error("Socket isn't connected");
         }
 
-        this.socket.push({
-            type: MessageType.GameStart
-        });
+        try {
+            await this.socket.push({
+                type: MessageType.GameStart
+            });
+        } catch (e) {
+            console.error("user push and broke", e);
+        }
     }
 
-    turn(board: Board): Promise<Move> {
+    async turn(board: Board): Promise<Move> {
         // TODO: probably justn have a function on socket
         if (this.socket.state !== State.Connected) {
             throw new Error("Socket isn't connected");
         }
 
-        this.socket.push({
+        await this.socket.push({
             type: MessageType.YourTurn,
             board: board.board,
             user: this.pieces,

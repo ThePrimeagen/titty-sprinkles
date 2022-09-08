@@ -64,14 +64,23 @@ export class Socket {
             msg = JSON.stringify(msg);
         }
 
+        if (this.ws.readyState !== this.ws.OPEN) {
+            this.setState(State.Done);
+            return Promise.reject();
+        }
+
         return new Promise((res, err) => {
-            this.ws.send(msg, (e?: Error) => {
-                if (e) {
-                    err(e);
-                } else {
-                    res();
-                }
-            });
+            try {
+                this.ws.send(msg, (e?: Error) => {
+                    if (e) {
+                        err(e);
+                    } else {
+                        res();
+                    }
+                });
+            } catch (e) {
+                this.setState(State.Error);
+            }
         });
     }
 
