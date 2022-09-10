@@ -1,8 +1,6 @@
-use std::{
-    sync::{
-        atomic::{AtomicUsize, Ordering},
-        Arc,
-    },
+use std::sync::{
+    atomic::{AtomicUsize, Ordering},
+    Arc,
 };
 
 use anyhow::Result;
@@ -95,12 +93,12 @@ fn get_move(board: &Board, user: &User) -> Move {
     }
 
     let moves = moves
-        .get(rand::thread_rng().gen_range(0..=moves.len()))
+        .get(rand::thread_rng().gen_range(0..moves.len()))
         .expect("this should always exist");
 
     let position = moves
         .1
-        .get(rand::thread_rng().gen_range(0..=moves.1.len()))
+        .get(rand::thread_rng().gen_range(0..moves.1.len()))
         .expect("positions should always be pre checked.");
 
     let position = [position.0 as i8, position.1 as i8];
