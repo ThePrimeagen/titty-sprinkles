@@ -1,4 +1,6 @@
 # Logs
+coverage
+out
 logs
 *.log
 npm-debug.log*
