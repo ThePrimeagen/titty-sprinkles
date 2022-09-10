@@ -3,7 +3,6 @@ use std::{
         atomic::{AtomicUsize, Ordering},
         Arc,
     },
-    time::Duration,
 };
 
 use anyhow::Result;
@@ -66,74 +65,50 @@ async fn create_client(args: &'static Args) -> Result<WebSocketStream<MaybeTlsSt
     return Ok(ws_stream);
 }
 
-fn can_use_piece(board: &Board, piece: usize) -> bool {
-    let mut found_one = false;
-    'outer: for y in 0..=2 {
+fn usable_spots(board: &Board, piece: usize) -> Vec<(usize, usize)> {
+    let mut out = vec![];
+    for y in 0..=2 {
         for x in 0..=2 {
             if board[y][x][piece as usize] == -1 {
-                found_one = true;
-                break 'outer;
+                out.push((x, y));
             }
         }
     }
 
-    return found_one;
-}
-
-fn get_user_piece(board: &Board, user: &User) -> u8 {
-    let mut out = 0;
-    loop {
-        let piece = rand::thread_rng().gen_range(0..=2);
-        let moves = user[piece];
-        if moves == 0 {
-            continue;
-        }
-
-        if can_use_piece(board, piece) {
-            out = piece as u8;
-            break;
-        }
-    }
-
     return out;
 }
 
-fn get_board_pos(board: &Board, piece: u8) -> [i8; 2] {
-    let mut out = [0; 2];
-    loop {
-        let x = rand::thread_rng().gen_range(0..=2);
-        let y = rand::thread_rng().gen_range(0..=2);
-
-        let board = board[y][x];
-        info!("getting_board_pos: {} {} {}", piece, x, y);
-        if board[piece as usize] >= 0 {
-            continue;
-        }
-        out[0] = x as i8;
-        out[1] = y as i8;
-
-        break;
-    }
-
-    return out;
+fn get_usable_pieces(board: &Board, user: &User) -> Vec<(u8, Vec<(usize, usize)>)> {
+    return user
+        .iter()
+        .enumerate()
+        .filter(|(_, count)| **count > 0)
+        .map(|(idx, _)| (idx as u8, usable_spots(board, idx)))
+        .filter(|(_, spots)| !spots.is_empty())
+        .collect();
 }
 
-fn play_turn(board: Board, user: User) -> Option<Move> {
-    let can_play = user.iter().enumerate().fold(false, |acc, (idx, count)| {
-        if count == &0 {
-            return acc;
-        }
-        return acc || can_use_piece(&board, idx);
-    });
-
-    if !can_play {
-        return None;
+fn get_move(board: &Board, user: &User) -> Move {
+    let moves = get_usable_pieces(board, user);
+    if moves.is_empty() {
+        return EMPTY_MOVE;
     }
 
-    let piece = get_user_piece(&board, &user);
-    let position = get_board_pos(&board, piece);
+    let moves = moves
+        .get(rand::thread_rng().gen_range(0..=moves.len()))
+        .expect("this should always exist");
 
-    return Some(Move { position, piece });
+    let position = moves
+        .1
+        .get(rand::thread_rng().gen_range(0..=moves.1.len()))
+        .expect("positions should always be pre checked.");
+
+    let position = [position.0 as i8, position.1 as i8];
+
+    return Move {
+        piece: moves.0,
+        position,
+    };
 }
 
 async fn run_player(args: &'static Args, player: usize) -> Result<bool> {
@@ -146,7 +121,6 @@ async fn run_player(args: &'static Args, player: usize) -> Result<bool> {
 
             let msg = msg.to_text()?;
             if msg == "L" {
-                info!("{}: msg L", player);
                 return Ok(false);
             }
             if msg == "GIGACHAD" {
@@ -154,19 +128,11 @@ async fn run_player(args: &'static Args, player: usize) -> Result<bool> {
             }
             match serde_json::from_str(msg)? {
                 Message::YourTurn { board, user } => {
-                    let m = play_turn(board, user);
-                    if let Some(m) = m {
-                        info!("move({}): {:?}", player, m);
-                        write
-                            .send(tungstenite::Message::from(serde_json::to_string(&m)?))
-                            .await?;
-                    } else {
-                        write
-                            .send(tungstenite::Message::from(serde_json::to_string(
-                                &EMPTY_MOVE,
-                            )?))
-                            .await?;
-                    }
+                    let m = get_move(&board, &user);
+                    info!("move({}): {:?}", player, m);
+                    write
+                        .send(tungstenite::Message::from(serde_json::to_string(&m)?))
+                        .await?;
                 }
                 _ => {}
             }
