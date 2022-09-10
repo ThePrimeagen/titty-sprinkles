@@ -23,10 +23,7 @@ server.on("connection", (ws) => {
     }
 });
 
-server.on("error", function(e) {
+server.on("error", function (e) {
     console.error("we got an error, this is bad...", e);
     process.exit(42);
 });
-
-
-

@@ -1,254 +1,250 @@
-
 <html>
     <head>
         <style>
-body {
-    background-color: black;
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    padding: 0;
-    margin: 0;
-    overflow: hidden; /* Hide scrollbars */
-    user-select: none;
-}
-.row {
-    background-color: #111;
-    height: 13vh;
-    margin: 10px;
-    position: relative;
-    left: 0;
-    right: 0;
-    display: flex;
-    flex-direction: row;
-    font-family: Helvetica;
-    font-weight: bold;
-}
+            body {
+                background-color: black;
+                position: absolute;
+                top: 0;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                padding: 0;
+                margin: 0;
+                overflow: hidden; /* Hide scrollbars */
+                user-select: none;
+            }
+            .row {
+                background-color: #111;
+                height: 13vh;
+                margin: 10px;
+                position: relative;
+                left: 0;
+                right: 0;
+                display: flex;
+                flex-direction: row;
+                font-family: Helvetica;
+                font-weight: bold;
+            }
 
-.row .item {
-    height: 13vh;
-    width: 13vh;
-    display: flex;
-    flex-direction: column;
-    margin: 0 1em 0 0;
-    color: #CCC
-}
+            .row .item {
+                height: 13vh;
+                width: 13vh;
+                display: flex;
+                flex-direction: column;
+                margin: 0 1em 0 0;
+                color: #ccc;
+            }
 
-.row .item img {
-    height: 11vh;
-    aspect-ratio: 1/1;
-}
-.row .item .title {
-    height: 2vh;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    letter-spacing: -1px;
-    font-size: 1rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
+            .row .item img {
+                height: 11vh;
+                aspect-ratio: 1/1;
+            }
+            .row .item .title {
+                height: 2vh;
+                justify-content: center;
+                align-items: center;
+                text-align: center;
+                letter-spacing: -1px;
+                font-size: 1rem;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
 
-.rating {
-    height: 100%;
-    width: 13vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 1.7em;
-    letter-spacing: -1px;
-    margin-right: 1vh;
-}
-.s {
-    background-color: #e48080;
-}
-.a {
-    background-color: #edbe86;
-}
-.b {
-    background-color: #f4de87;
-}
-.c {
-    background-color: #7fff7f;
-}
-.d {
-    background-color: #7fbfff;
-}
-.e {
-    background-color: #7f7fff;
-}
-.f {
-    background-color: #ff7fff;
-}
+            .rating {
+                height: 100%;
+                width: 13vh;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                font-size: 1.7em;
+                letter-spacing: -1px;
+                margin-right: 1vh;
+            }
+            .s {
+                background-color: #e48080;
+            }
+            .a {
+                background-color: #edbe86;
+            }
+            .b {
+                background-color: #f4de87;
+            }
+            .c {
+                background-color: #7fff7f;
+            }
+            .d {
+                background-color: #7fbfff;
+            }
+            .e {
+                background-color: #7f7fff;
+            }
+            .f {
+                background-color: #ff7fff;
+            }
         </style>
     </head>
     <body>
         <div class="row">
-            <div class="rating s">
-                neovim
-            </div>
+            <div class="rating s">neovim</div>
             <div class="item">
-                <img src="./images/catppuccin.png" title="catppuccin"/>
+                <img src="./images/catppuccin.png" title="catppuccin" />
                 <div class="title">catppuccin</div>
             </div>
             <div class="item">
-                <img src="./images/tokio-night.jpeg" title="tokio-night"/>
+                <img src="./images/tokio-night.jpeg" title="tokio-night" />
                 <div class="title">tokio-night</div>
             </div>
             <div class="item">
-                <img src="./images/gruv.png" title="gruv"/>
+                <img src="./images/gruv.png" title="gruv" />
                 <div class="title">gruv</div>
             </div>
         </div>
         <div class="row">
-            <div class="rating a">
-                vi
-            </div>
+            <div class="rating a">vi</div>
             <div class="item">
-                <img src="./images/degen.gif" title="degen"/>
+                <img src="./images/degen.gif" title="degen" />
                 <div class="title">degen</div>
             </div>
             <div class="item">
-                <img src="./images/ayu.png" title="ayu"/>
+                <img src="./images/ayu.png" title="ayu" />
                 <div class="title">ayu</div>
             </div>
             <div class="item">
-                <img src="./images/moonfly.jpeg" title="moonfly"/>
+                <img src="./images/moonfly.jpeg" title="moonfly" />
                 <div class="title">moonfly</div>
             </div>
             <div class="item">
-                <img src="./images/embark.jpeg" title="embark"/>
+                <img src="./images/embark.jpeg" title="embark" />
                 <div class="title">embark</div>
             </div>
             <div class="item">
-                <img src="./images/desertEx.png" title="desertEx"/>
+                <img src="./images/desertEx.png" title="desertEx" />
                 <div class="title">desertEx</div>
             </div>
         </div>
         <div class="row">
-            <div class="rating b">
-                intellij
-            </div>
+            <div class="rating b">intellij</div>
             <div class="item">
-                <img src="./images/oxocarbon-lua.jpeg" title="oxocarbon-lua"/>
+                <img src="./images/oxocarbon-lua.jpeg" title="oxocarbon-lua" />
                 <div class="title">oxocarbon-lua</div>
             </div>
             <div class="item">
-                <img src="./images/pine.png" title="pine"/>
+                <img src="./images/pine.png" title="pine" />
                 <div class="title">pine</div>
             </div>
             <div class="item">
-                <img src="./images/nordfox.png" title="nordfox"/>
+                <img src="./images/nordfox.png" title="nordfox" />
                 <div class="title">nordfox</div>
             </div>
             <div class="item">
-                <img src="./images/kawagawa.jpeg" title="kawagawa"/>
+                <img src="./images/kawagawa.jpeg" title="kawagawa" />
                 <div class="title">kawagawa</div>
             </div>
             <div class="item">
-                <img src="./images/dracula-mod1.jpeg" title="dracula mod1"/>
+                <img src="./images/dracula-mod1.jpeg" title="dracula mod1" />
                 <div class="title">dracula mod1</div>
             </div>
             <div class="item">
-                <img src="./images/material.png" title="material"/>
+                <img src="./images/material.png" title="material" />
                 <div class="title">material</div>
             </div>
         </div>
         <div class="row">
-            <div class="rating c">
-                nano
-            </div>
+            <div class="rating c">nano</div>
             <div class="item">
-                <img src="./images/material-deep-ocean.jpeg" title="material deep ocean"/>
+                <img
+                    src="./images/material-deep-ocean.jpeg"
+                    title="material deep ocean"
+                />
                 <div class="title">material deep ocean</div>
             </div>
             <div class="item">
-                <img src="./images/nord.png" title="nord"/>
+                <img src="./images/nord.png" title="nord" />
                 <div class="title">nord</div>
             </div>
             <div class="item">
-                <img src="./images/solarized-vim.png" title="solarized-vim"/>
+                <img src="./images/solarized-vim.png" title="solarized-vim" />
                 <div class="title">solarized-vim</div>
             </div>
         </div>
         <div class="row">
-            <div class="rating d">
-                atom
-            </div>
+            <div class="rating d">atom</div>
             <div class="item">
-                <img src="./images/carbon-fox.jpeg" title="carbon-fox"/>
+                <img src="./images/carbon-fox.jpeg" title="carbon-fox" />
                 <div class="title">carbon-fox</div>
             </div>
             <div class="item">
-                <img src="./images/mono-keywords.jpeg" title="mono-keywords"/>
+                <img src="./images/mono-keywords.jpeg" title="mono-keywords" />
                 <div class="title">mono-keywords</div>
             </div>
             <div class="item">
-                <img src="./images/gruvbox-baby.jpeg" title="gruvbox baby"/>
+                <img src="./images/gruvbox-baby.jpeg" title="gruvbox baby" />
                 <div class="title">gruvbox baby</div>
             </div>
             <div class="item">
-                <img src="./images/nightmare.png" title="nightmare"/>
+                <img src="./images/nightmare.png" title="nightmare" />
                 <div class="title">nightmare</div>
             </div>
         </div>
         <div class="row">
-            <div class="rating e">
-                vscode
-            </div>
+            <div class="rating e">vscode</div>
             <div class="item">
-                <img src="./images/monokai-pro.jpeg" title="monokai-pro"/>
+                <img src="./images/monokai-pro.jpeg" title="monokai-pro" />
                 <div class="title">monokai-pro</div>
             </div>
             <div class="item">
-                <img src="./images/default-notepad.png" title="default notepad"/>
+                <img
+                    src="./images/default-notepad.png"
+                    title="default notepad"
+                />
                 <div class="title">default notepad</div>
             </div>
             <div class="item">
-                <img src="./images/onedark-darker.jpeg" title="onedark darker"/>
+                <img
+                    src="./images/onedark-darker.jpeg"
+                    title="onedark darker"
+                />
                 <div class="title">onedark darker</div>
             </div>
             <div class="item">
-                <img src="./images/simple-dark.png" title="simple-dark"/>
+                <img src="./images/simple-dark.png" title="simple-dark" />
                 <div class="title">simple-dark</div>
             </div>
         </div>
         <div class="row">
-            <div class="rating f">
-                emacs
-            </div>
+            <div class="rating f">emacs</div>
             <div class="item">
-                <img src="./images/efocado.jpeg" title="efocado"/>
+                <img src="./images/efocado.jpeg" title="efocado" />
                 <div class="title">efocado</div>
             </div>
             <div class="item">
-                <img src="./images/gap-style.png" title="gap style"/>
+                <img src="./images/gap-style.png" title="gap style" />
                 <div class="title">gap style</div>
             </div>
             <div class="item">
-                <img src="./images/mindre-dark.png" title="mindre-dark"/>
+                <img src="./images/mindre-dark.png" title="mindre-dark" />
                 <div class="title">mindre-dark</div>
             </div>
             <div class="item">
-                <img src="./images/vscode-snazzy.png" title="vscode-snazzy"/>
+                <img src="./images/vscode-snazzy.png" title="vscode-snazzy" />
                 <div class="title">vscode-snazzy</div>
             </div>
             <div class="item">
-                <img src="./images/vscode-theme.jpeg" title="vscode-theme"/>
+                <img src="./images/vscode-theme.jpeg" title="vscode-theme" />
                 <div class="title">vscode-theme</div>
             </div>
             <div class="item">
-                <img src="./images/tomorrow-blue-me.jpeg" title="tomorrow-blue-me"/>
+                <img
+                    src="./images/tomorrow-blue-me.jpeg"
+                    title="tomorrow-blue-me"
+                />
                 <div class="title">tomorrow-blue-me</div>
             </div>
             <div class="item">
-                <img src="./images/gruv-light.png" title="gruv-light"/>
+                <img src="./images/gruv-light.png" title="gruv-light" />
                 <div class="title">gruv-light</div>
             </div>
         </div>
     </body>
 </html>
-

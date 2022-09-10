@@ -2,11 +2,15 @@ import { Board, PieceType } from "./board";
 import { ISocket, State } from "./socket";
 
 export type Move = {
-    position: [number, number],
-    piece: PieceType,
-}
+    position: [number, number];
+    piece: PieceType;
+};
 
-function explodePromise<T>(): {res: (val: T | PromiseLike<T>) => void, rej: (e?: any) => void, promise: Promise<T>} {
+function explodePromise<T>(): {
+    res: (val: T | PromiseLike<T>) => void;
+    rej: (e?: any) => void;
+    promise: Promise<T>;
+} {
     let res = (_: T | PromiseLike<T>) => {};
     let rej = (_?: Error) => {};
     let promise = new Promise<T>((r, e) => {
@@ -48,15 +52,10 @@ export class User {
             this.resolve(JSON.parse(msg) as Move);
         });
 
-        this.pieces = [
-            3,
-            3,
-            3
-        ]
+        this.pieces = [3, 3, 3];
     }
 
     async play() {
-
         // TODO: probably justn have a function on socket
         if (this.socket.state !== State.Connected) {
             throw new Error("Socket isn't connected");
@@ -64,7 +63,7 @@ export class User {
 
         try {
             await this.socket.push({
-                type: MessageType.GameStart
+                type: MessageType.GameStart,
             });
         } catch (e) {
             console.error("user push and broke", e);
@@ -83,7 +82,7 @@ export class User {
             user: this.pieces,
         });
 
-        const {res, rej, promise} = explodePromise<Move>();
+        const { res, rej, promise } = explodePromise<Move>();
         this.res = res;
         this.rej = rej;
 
@@ -108,4 +107,3 @@ export class User {
         }
     }
 }
-

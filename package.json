@@ -1,31 +1,31 @@
 {
-  "name": "titty-sprinkles",
-  "private": true,
-  "version": "0.0.0",
-  "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build",
-    "preview": "vite preview",
-    "test": "jest"
-  },
-  "devDependencies": {
-    "typescript": "^4.6.4",
-    "vite": "^3.0.7"
-  },
-  "dependencies": {
-    "@types/jest": "^29.0.0",
-    "@types/ws": "^8.5.3",
-    "jest": "^29.0.2",
-    "prettier": "^2.7.1",
-    "ts-jest": "^28.0.8",
-    "ts-node": "^10.9.1",
-    "ws": "^8.8.1"
-  },
-  "prettier": {
-    "trailingComma": "always",
-    "tabWidth": 4,
-    "semi": true,
-    "singleQuote": false,
-    "maxLineLength": 80
-  }
+    "name": "titty-sprinkles",
+    "private": true,
+    "version": "0.0.0",
+    "scripts": {
+        "dev": "vite",
+        "build": "tsc && vite build",
+        "preview": "vite preview",
+        "test": "jest"
+    },
+    "devDependencies": {
+        "typescript": "^4.6.4",
+        "vite": "^3.0.7"
+    },
+    "dependencies": {
+        "@types/jest": "^29.0.0",
+        "@types/ws": "^8.5.3",
+        "jest": "^29.0.2",
+        "prettier": "^2.7.1",
+        "ts-jest": "^28.0.8",
+        "ts-node": "^10.9.1",
+        "ws": "^8.8.1"
+    },
+    "prettier": {
+        "trailingComma": "all",
+        "tabWidth": 4,
+        "semi": true,
+        "singleQuote": false,
+        "printWidth": 80
+    }
 }

@@ -12,15 +12,14 @@ export class Game {
     private id: number;
 
     constructor(sockets: Sockets) {
-        this.users = sockets.map(x => new User(x)) as Users;
+        this.users = sockets.map((x) => new User(x)) as Users;
         this.board = new Board();
         this.id = gameIdx++;
     }
 
     async play() {
-
         let current = 0;
-        this.users.forEach(u => u.play());
+        this.users.forEach((u) => u.play());
 
         let errored = false;
         do {
@@ -33,9 +32,10 @@ export class Game {
                     continue;
                 }
 
-                if (this.board.move(current, move.piece, move.position) &&
-                    user.pieces[move.piece] > 0) {
-
+                if (
+                    this.board.move(current, move.piece, move.position) &&
+                    user.pieces[move.piece] > 0
+                ) {
                     current = (current + 1) % 4;
                     user.pieces[move.piece]--;
                 }
@@ -43,7 +43,6 @@ export class Game {
                 errored = true;
                 break;
             }
-
         } while (!this.board.gameOver());
 
         this.users.forEach((u, i) => {
@@ -58,5 +57,4 @@ export class Game {
             console.log("game finished", this.id);
         }
     }
-
 }

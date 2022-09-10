@@ -27,7 +27,7 @@ export class Board {
     constructor() {
         this.board = new Array(3);
         for (let i = 0; i < 3; ++i) {
-            this.board[i] = new Array(3).fill(0).map(_ => [-1, -1, -1]);
+            this.board[i] = new Array(3).fill(0).map((_) => [-1, -1, -1]);
         }
         this.winner = -1;
 
@@ -60,7 +60,7 @@ export class Board {
         let full = true;
         for (let y = 0; full && y < 3; ++y) {
             for (let x = 0; full && x < 3; ++x) {
-                full = this.board[y][x].every(x => x >= 0);
+                full = this.board[y][x].every((x) => x >= 0);
             }
         }
 
@@ -91,12 +91,12 @@ export class Board {
             this.board[0][0],
             this.board[1][1],
             this.board[2][2],
-        ]
+        ];
         const diag2: BoardLine = [
             this.board[0][2],
             this.board[1][1],
             this.board[2][0],
-        ]
+        ];
 
         return this.hasWin(player, diag1) || this.hasWin(player, diag2);
     }
@@ -120,4 +120,3 @@ export class Board {
         return false;
     }
 }
-

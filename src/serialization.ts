@@ -20,4 +20,4 @@ export function serialize(): Serialize {
 }
 
 */
-export {}
+export {};
