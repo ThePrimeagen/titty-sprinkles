@@ -4,4 +4,7 @@
 !package.json
 !yarn.lock
 !tsconfig.json
+!Cargo.lock
+!Cargo.toml
+!run-test
 
