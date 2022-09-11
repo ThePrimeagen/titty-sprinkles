@@ -1,7 +1,7 @@
-use std::sync::{
+use std::{sync::{
     atomic::{AtomicUsize, Ordering},
     Arc,
-};
+}, time::SystemTime};
 
 use anyhow::Result;
 use clap::Parser;
@@ -109,23 +109,22 @@ fn get_move(board: &Board, user: &User) -> Move {
     };
 }
 
-async fn run_player(args: &'static Args, player: usize) -> Result<bool> {
+async fn run_player(args: &'static Args, player: usize) -> Result<usize> {
     let ws_stream = create_client(args).await?;
     let (mut write, mut read) = ws_stream.split();
+    let mut count = 0;
 
     while let Some(Ok(msg)) = read.next().await {
         if msg.is_text() {
             info!("message({}): {}", player, msg);
 
             let msg = msg.to_text()?;
-            if msg == "L" {
-                return Ok(false);
-            }
-            if msg == "GIGACHAD" {
-                return Ok(true);
+            if msg == "L" || msg == "GIGACHAD" {
+                return Ok(count);
             }
             match serde_json::from_str(msg)? {
                 Message::YourTurn { board, user } => {
+                    count += 1;
                     let m = get_move(&board, &user);
                     info!("move({}): {:?}", player, m);
                     write
@@ -137,10 +136,12 @@ async fn run_player(args: &'static Args, player: usize) -> Result<bool> {
         }
     }
 
-    return Ok(false);
+    // NOTE: Something has happened to the socket, but i don't want to
+    // unreachable! this because i don't want the program to terminate.
+    return Ok(0);
 }
 
-async fn play(args: &'static Args) -> Result<Vec<bool>> {
+async fn play(args: &'static Args) -> Result<usize> {
     let player = Arc::new(AtomicUsize::new(0));
     let mut handles = vec![];
 
@@ -166,9 +167,15 @@ async fn play(args: &'static Args) -> Result<Vec<bool>> {
         .iter()
         .flatten()
         .map(|x| *x)
-        .collect::<Vec<bool>>();
+        .sum();
 
     return Ok(out);
+}
+
+struct Stats {
+    start: u128,
+    turns: usize,
+    duration: u128,
 }
 
 #[tokio::main]
@@ -177,25 +184,38 @@ async fn main() -> Result<()> {
 
     let args: &'static Args = Box::leak(Box::new(Args::parse()));
     let semaphore = Arc::new(Semaphore::new(args.parallel));
-    let winners: Arc<Mutex<[usize; 4]>> = Arc::new(Mutex::new([0; 4]));
+    let stats: Arc<Mutex<Vec<Stats>>> = Arc::new(Mutex::new(Vec::with_capacity(args.games)));
+    let error_count = Arc::new(AtomicUsize::new(0));
     let mut handles = vec![];
 
     warn!("args {:?}", args);
-    for _ in 0..args.games {
+    let now = std::time::SystemTime::now();
+
+    for i in 0..args.games {
+        stats.lock().await.push(Stats {
+            duration: 0,
+            turns: 0,
+            start: 0,
+        });
         let semaphore = semaphore.clone();
         let permit = semaphore.acquire_owned().await?;
+        let stats = stats.clone();
+        let error_count = error_count.clone();
 
-        let winners = winners.clone();
         handles.push(tokio::spawn(async move {
+            let now = SystemTime::now();
             match play(args).await {
                 Err(e) => {
                     error!("There was an error playing the game {}", e);
+                    error_count.fetch_add(1, Ordering::Relaxed);
                 }
-                Ok(results) => {
-                    for (idx, r) in results.iter().enumerate() {
-                        if *r {
-                            winners.lock().await[idx] += 1;
-                        }
+                Ok(turns) => {
+                    if let (Ok(duration), Ok(epoch)) = (now.elapsed(), now.duration_since(SystemTime::UNIX_EPOCH)) {
+                        stats.lock().await[i] = Stats {
+                            turns,
+                            start: epoch.as_micros(),
+                            duration: duration.as_micros()
+                        };
                     }
                 }
             }
@@ -203,9 +223,13 @@ async fn main() -> Result<()> {
         }));
     }
 
-    warn!("{:?}", winners.lock().await);
 
     futures::future::join_all(handles).await;
+    println!("errors: {}", error_count.load(Ordering::Relaxed));
+    println!("duration total: {}", now.elapsed()?.as_micros());
+    for (idx, stat) in stats.lock().await.iter().enumerate() {
+        println!("{}, {}, {}, {}", idx, stat.start, stat.turns, stat.duration);
+    }
 
     return Ok(());
 }
