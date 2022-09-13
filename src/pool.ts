@@ -8,7 +8,7 @@ export interface Pool<T extends PoolObject> {
     release(item: T): void;
 }
 
-export interface SimpleArrayPool<T extends number> {
+export interface SimpleArrayPool<T> {
     get(): T[];
     release(item: T[]): void;
 }
@@ -37,7 +37,7 @@ export class ObjectPool<T extends PoolObject> implements Pool<T> {
     }
 }
 
-export class SimpleArrayPool<T extends number> implements SimpleArrayPool<T> {
+export class SimpleArrayPool<T> implements SimpleArrayPool<T> {
     private factory: () => T[];
     private data: T[][];
 

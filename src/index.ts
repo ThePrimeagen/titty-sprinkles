@@ -1,7 +1,7 @@
 import { Game } from "./game";
 import WebSocket from "ws";
 import { ISocket, Socket } from "./socket";
-// import { ObjectPool } from "./pool";
+import { ObjectPool } from "./pool";
 
 const server = new WebSocket.Server({
     host: "127.0.0.1",
@@ -11,10 +11,12 @@ const server = new WebSocket.Server({
 type Sockets = [ISocket, ISocket, ISocket, ISocket];
 // const sockets = new ObjectPool<Socket>();
 
-async function play_game(sockets: Sockets): Promise<void> {
-    const game = new Game(sockets);
+const games = new ObjectPool<Game>(() => new Game());
 
+async function play_game(sockets: Sockets): Promise<void> {
+    const game = games.get().setSockets(sockets);
     await game.play();
+    games.release(game);
 }
 
 let sockets: ISocket[] = [];

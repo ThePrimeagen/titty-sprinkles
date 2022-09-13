@@ -16,11 +16,19 @@ const usersPool = new ArrayPoolImpl<User>(players);
 
 let gameIdx = 0;
 export class Game {
-    private users: Users;
-    private board: Board;
-    private id: number;
+    private users!: Users;
+    private board!: Board;
+    private id!: number;
 
-    constructor(sockets: Sockets) {
+    constructor() { }
+
+    // yes... i am lazy
+    reset() {
+        // @ts-ignore
+        this.users = this.board = undefined;
+    }
+
+    setSockets(sockets: Sockets): this {
         const users = usersPool.get();
         for (let i = 0; i < sockets.length; ++i) {
             users[i] = players.get().setSocket(sockets[i]);
@@ -29,6 +37,8 @@ export class Game {
         this.users = users as Users;
         this.board = boards.get();
         this.id = gameIdx++;
+
+        return this;
     }
 
     async play() {
