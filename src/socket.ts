@@ -21,13 +21,14 @@ export interface ISocket {
     onStateChange(cb: (prev: State, next: State) => void): void;
     onMessage(cb: (message: string) => void): void;
     push(msg: string | object): Promise<void>;
+    detach(): void;
 }
 
 export class Socket {
     public state: State;
 
-    private msgCallback!: (msg: string) => void;
-    private stateChange!: (prev: State, state: State) => void;
+    private msgCallback?: (msg: string) => void;
+    private stateChange?: (prev: State, state: State) => void;
 
     constructor(private ws: WebSocket) {
         this.state = State.Connected;
@@ -59,6 +60,11 @@ export class Socket {
         this.msgCallback = cb;
     }
 
+    detach() {
+        this.stateChange = undefined;
+        this.msgCallback = undefined;
+    }
+
     push(msg: string | object): Promise<void> {
         if (typeof msg === "object") {
             msg = JSON.stringify(msg);
@@ -85,6 +91,8 @@ export class Socket {
     }
 
     private setState(state: State) {
-        this.stateChange(this.state, state);
+        if (this.stateChange) {
+            this.stateChange(this.state, state);
+        }
     }
 }

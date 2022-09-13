@@ -1,9 +1,15 @@
 import { Board } from "./board";
+import { ArrayPoolImpl, ObjectPool } from "./pool";
 import { ISocket } from "./socket";
 import { User } from "./user";
 
 type Sockets = [ISocket, ISocket, ISocket, ISocket];
 type Users = [User, User, User, User];
+
+const players = new ObjectPool<User>(() => {
+    return new User();
+});
+const usersPool = new ArrayPoolImpl<User>(players);
 
 let gameIdx = 0;
 export class Game {
@@ -12,7 +18,12 @@ export class Game {
     private id: number;
 
     constructor(sockets: Sockets) {
-        this.users = sockets.map((x) => new User(x)) as Users;
+        const users = usersPool.get();
+        for (let i = 0; i < sockets.length; ++i) {
+            users[i] = players.get().setSocket(sockets[i]);
+        }
+
+        this.users = users as Users;
         this.board = new Board();
         this.id = gameIdx++;
     }
@@ -22,6 +33,7 @@ export class Game {
         this.users.forEach((u) => u.play());
 
         let errored = false;
+        let error = undefined;
         do {
             const user = this.users[current];
             try {
@@ -40,17 +52,21 @@ export class Game {
                     user.pieces[move.piece]--;
                 }
             } catch (e) {
-                errored = true;
+                // @ts-ignore
+                console.log("LOOP: error", e.message);
+                error = e;
                 break;
             }
         } while (!this.board.gameOver());
 
-        this.users.forEach((u, i) => {
-            u.done(i === this.board.winner && !errored);
-        });
+        for (let i = 0; i < this.users.length; ++i) {
+            this.users[i].done(i === this.board.winner && !errored);
+        }
 
-        if (errored) {
-            console.log("game errored", this.id);
+        usersPool.release(this.users);
+
+        if (error) {
+            console.log("game errored", this.id, error);
         }
 
         if (this.id % 1000 === 0) {

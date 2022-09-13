@@ -30,32 +30,71 @@ enum MessageType {
     YourTurn = "YourTurn",
 }
 
+let id = 0;
 export class User {
     private res?: (val: Move | PromiseLike<Move>) => void;
     private rej?: (err?: any) => void;
+    private socket!: ISocket;
 
-    public pieces: [number, number, number];
+    private boundOnStateChange: (prev: State, next: State) => void;
+    private boundOnMessage: (msg: string) => void;
+    private _id: number;
 
-    constructor(private socket: ISocket) {
-        socket.onStateChange((_: State, next: State) => {
-            if (this.res) {
-                if (next === State.Error) {
-                    this.reject("socket is errored");
-                }
-                if (next === State.Done) {
-                    this.reject("socket is closed");
-                }
-            }
-        });
+    public pieces!: [number, number, number];
 
-        socket.onMessage((msg: string) => {
-            this.resolve(JSON.parse(msg) as Move);
-        });
+    private log(...msg: string[]) {
+        console.log(this._id, "User", ...msg);
+    }
 
+    constructor() {
+        this._id = id++;
+        this.reset();
+        this.boundOnStateChange = this.onStateChange.bind(this);
+        this.boundOnMessage = this.onMessage.bind(this);
+    }
+
+    reset() {
+        this.log("reset");
+        // ... something here
         this.pieces = [3, 3, 3];
+        this.res = this.rej = undefined;
+
+        // else we will get late calls to state change
+        if (this.socket) {
+            this.socket.detach();
+            // @ts-ignore i am lazy
+            this.socket = undefined;
+        }
+
+    }
+
+    private onStateChange(_: State, next: State) {
+        this.log(`onStateChange ${next}`);
+        if (this.res) {
+            if (next === State.Error) {
+                this.reject("socket is errored");
+            }
+            if (next === State.Done) {
+                this.reject(`socket is closed: ${this._id}`);
+            }
+        }
+    }
+
+    setSocket(socket: ISocket): this {
+        this.log("setSocket");
+        socket.onStateChange(this.boundOnStateChange);
+        socket.onMessage(this.boundOnMessage);
+
+        this.socket = socket;
+        return this;
+    }
+
+    private onMessage(msg: string) {
+        this.resolve(JSON.parse(msg) as Move);
     }
 
     async play() {
+        this.log("play");
         // TODO: probably justn have a function on socket
         if (this.socket.state !== State.Connected) {
             throw new Error("Socket isn't connected");
@@ -71,6 +110,7 @@ export class User {
     }
 
     async turn(board: Board): Promise<Move> {
+        this.log("turn");
         // TODO: probably justn have a function on socket
         if (this.socket.state !== State.Connected) {
             throw new Error("Socket isn't connected");
@@ -107,3 +147,4 @@ export class User {
         }
     }
 }
+
