@@ -19,13 +19,16 @@ async function play_game(sockets: Sockets): Promise<void> {
     games.release(game);
 }
 
-let sockets: ISocket[] = [];
+let sockets = new ObjectPool<Socket>(() => new Socket());
+
+let socketsArray: ISocket[] = [];
 server.on("connection", (ws) => {
-    const socket = new Socket(ws);
-    sockets.push(socket);
-    if (sockets.length === 4) {
-        play_game(sockets as Sockets);
-        sockets = [];
+    const socket = sockets.get().setSocket(ws);
+
+    socketsArray.push(socket);
+    if (socketsArray.length === 4) {
+        play_game(socketsArray as Sockets);
+        socketsArray = [];
     }
 });
 

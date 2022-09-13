@@ -42,12 +42,6 @@ export class User {
 
     public pieces!: [number, number, number];
 
-    /**
-    private log(...msg: string[]) {
-        console.log(this._id, "User", ...msg);
-    }
-    */
-
     constructor() {
         this._id = id++;
         this.reset();

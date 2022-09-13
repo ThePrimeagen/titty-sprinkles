@@ -25,31 +25,69 @@ export interface ISocket {
 }
 
 export class Socket {
-    public state: State;
+    public state!: State;
+
+    private ws!: WebSocket;
 
     private msgCallback?: (msg: string) => void;
     private stateChange?: (prev: State, state: State) => void;
+    private wsOnClose: (this: Socket) => void;
+    private wsOnError: (this: Socket, error?: Error) => void;
+    private wsOnMessage: (this: Socket, msg: WebSocket.RawData, isBinary: boolean) => void;
 
-    constructor(private ws: WebSocket) {
+    constructor() {
+        this.wsOnClose = this.onClose.bind(this);
+        this.wsOnError = this.onError.bind(this);
+        this.wsOnMessage = this.onMessageReceive.bind(this);
+    }
+
+    private onMessageReceive(msg: WebSocket.RawData, isBinary: boolean) {
+        if (isBinary) {
+            return;
+        }
+
+        if (this.msgCallback) {
+            this.msgCallback(msg.toString());
+        }
+    }
+
+    private onError(_e?: Error) {
+        this.setState(State.Error);
+    }
+
+    private onClose() {
+        this.setState(State.Done);
+    }
+
+    setSocket(ws: WebSocket): this {
+        this.ws = ws;
         this.state = State.Connected;
 
-        this.ws.on("close", () => {
-            this.setState(State.Done);
-        });
+        // @ts-ignore I AM LAZY DONT GIVE AF
+        this.ws.on("close", this.wsOnClose);
 
-        this.ws.on("error", (_e) => {
-            this.setState(State.Error);
-        });
+        // @ts-ignore I AM LAZY DONT GIVE AF
+        this.ws.on("error", this.wsOnError);
 
-        this.ws.on("message", (msg: WebSocket.RawData, isBinary: boolean) => {
-            if (isBinary) {
-                return;
-            }
+        // @ts-ignore I AM LAZY DONT GIVE AF
+        this.ws.on("message", this.wsOnMessage);
 
-            if (this.msgCallback) {
-                this.msgCallback(msg.toString());
-            }
-        });
+        return this;
+    }
+
+    reset() {
+        // @ts-ignore I AM LAZY DONT GIVE AF
+        this.ws.off("close", this.wsOnClose);
+
+        // @ts-ignore I AM LAZY DONT GIVE AF
+        this.ws.off("error", this.wsOnError);
+
+        // @ts-ignore I AM LAZY DONT GIVE AF
+        this.ws.off("message", this.wsOnMessage);
+
+        // @ts-ignore I AM LAZY
+        this.ws = undefined;
+        this.state = State.Done;
     }
 
     onStateChange(cb: (prev: State, next: State) => void): void {
