@@ -19,19 +19,30 @@ function serializePiece(piece: BoardPiece): number {
 */
 
 export class Board {
-    public board: BoardPiece[][];
-    public winner: number;
+    public board!: BoardPiece[][];
+    public winner!: number;
 
-    private finished: boolean;
+    private finished!: boolean;
 
     constructor() {
         this.board = new Array(3);
         for (let i = 0; i < 3; ++i) {
             this.board[i] = new Array(3).fill(0).map((_) => [-1, -1, -1]);
         }
-        this.winner = -1;
 
+        this.reset();
+    }
+
+    reset() {
+        this.winner = -1;
         this.finished = false;
+        for (let i = 0; i < 3; ++i) {
+            for (let j = 0; j < 3; ++j) {
+                this.board[i][j][0] = -1;
+                this.board[i][j][1] = -1;
+                this.board[i][j][2] = -1;
+            }
+        }
     }
 
     move(player: number, piece: PieceType, pos: Position): boolean {
@@ -60,7 +71,9 @@ export class Board {
         let full = true;
         for (let y = 0; full && y < 3; ++y) {
             for (let x = 0; full && x < 3; ++x) {
-                full = this.board[y][x].every((x) => x >= 0);
+                for (let i = 0; full && i < 3; ++i) {
+                    full = this.board[y][x][i] !== -1;
+                }
             }
         }
 
@@ -112,8 +125,10 @@ export class Board {
     private hasWin(player: number, pieces: BoardLine): boolean {
         for (let idx = 0; idx < this.wins.length; ++idx) {
             const win = this.wins[idx];
-            if (win.every((p, i) => pieces[i][p] === player)) {
-                return true;
+
+            let containsWin = true;
+            for (let pieceIdx = 0; containsWin && pieceIdx < win.length; ++pieceIdx) {
+                containsWin = pieces[pieceIdx][win[pieceIdx]] === player;
             }
         }
 

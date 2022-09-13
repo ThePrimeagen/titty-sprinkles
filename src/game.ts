@@ -6,6 +6,9 @@ import { User } from "./user";
 type Sockets = [ISocket, ISocket, ISocket, ISocket];
 type Users = [User, User, User, User];
 
+const boards = new ObjectPool<Board>(() => {
+    return new Board();
+});
 const players = new ObjectPool<User>(() => {
     return new User();
 });
@@ -24,13 +27,15 @@ export class Game {
         }
 
         this.users = users as Users;
-        this.board = new Board();
+        this.board = boards.get();
         this.id = gameIdx++;
     }
 
     async play() {
         let current = 0;
-        this.users.forEach((u) => u.play());
+        for (let i = 0; i < this.users.length; ++i) {
+            this.users[i].play();
+        }
 
         let errored = false;
         let error = undefined;
@@ -64,6 +69,7 @@ export class Game {
         }
 
         usersPool.release(this.users);
+        boards.release(this.board);
 
         if (error) {
             console.log("game errored", this.id, error);

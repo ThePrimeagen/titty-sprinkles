@@ -42,9 +42,11 @@ export class User {
 
     public pieces!: [number, number, number];
 
+    /**
     private log(...msg: string[]) {
         console.log(this._id, "User", ...msg);
     }
+    */
 
     constructor() {
         this._id = id++;
@@ -54,7 +56,7 @@ export class User {
     }
 
     reset() {
-        this.log("reset");
+        // this.log("reset");
         // ... something here
         this.pieces = [3, 3, 3];
         this.res = this.rej = undefined;
@@ -69,7 +71,7 @@ export class User {
     }
 
     private onStateChange(_: State, next: State) {
-        this.log(`onStateChange ${next}`);
+        // this.log(`onStateChange ${next}`);
         if (this.res) {
             if (next === State.Error) {
                 this.reject("socket is errored");
@@ -81,7 +83,7 @@ export class User {
     }
 
     setSocket(socket: ISocket): this {
-        this.log("setSocket");
+        // this.log("setSocket");
         socket.onStateChange(this.boundOnStateChange);
         socket.onMessage(this.boundOnMessage);
 
@@ -94,7 +96,7 @@ export class User {
     }
 
     async play() {
-        this.log("play");
+        //this.log("play");
         // TODO: probably justn have a function on socket
         if (this.socket.state !== State.Connected) {
             throw new Error("Socket isn't connected");
@@ -110,7 +112,7 @@ export class User {
     }
 
     async turn(board: Board): Promise<Move> {
-        this.log("turn");
+        // this.log("turn");
         // TODO: probably justn have a function on socket
         if (this.socket.state !== State.Connected) {
             throw new Error("Socket isn't connected");
