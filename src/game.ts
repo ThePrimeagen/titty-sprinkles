@@ -1,7 +1,7 @@
 import { Board } from "./board";
 import { ArrayPoolImpl, ObjectPool } from "./pool";
-import { ISocket } from "./socket";
-import { User } from "./user";
+import { ISocket, State } from "./socket";
+import { Move, User } from "./user";
 
 type Sockets = [ISocket, ISocket, ISocket, ISocket];
 type Users = [User, User, User, User];
@@ -20,12 +20,23 @@ export class Game {
     private board!: Board;
     private id!: number;
 
-    constructor() { }
+    // state variables
+    private error?: Error;
+    private current!: number;
+    private cb!: () => void;
+    private boundProcessResponse: (this: Game, state?: State, move?: Move) => void;
+
+    constructor() {
+        this.reset();
+        this.boundProcessResponse = this.processResponse.bind(this);
+    }
 
     // yes... i am lazy
     reset() {
         // @ts-ignore
-        this.users = this.board = undefined;
+        this.users = this.board = this.cb = undefined;
+
+        this.current = 0;
     }
 
     setSockets(sockets: Sockets): this {
@@ -41,52 +52,75 @@ export class Game {
         return this;
     }
 
-    async play() {
-        let current = 0;
+    play(cb: () => void) {
+        this.cb = cb;
+        this.current = 0;
         for (let i = 0; i < this.users.length; ++i) {
             this.users[i].play();
         }
 
-        let errored = false;
-        let error = undefined;
-        do {
-            const user = this.users[current];
-            try {
-                const move = await user.turn(this.board);
+        this.error = undefined;
+        this.playRound();
+    }
 
-                if (move.position[0] === -1) {
-                    current = (current + 1) % 4;
-                    continue;
-                }
+    private inc() {
+        this.current = (this.current + 1) % 4;
+    }
 
-                if (
-                    this.board.move(current, move.piece, move.position) &&
-                    user.pieces[move.piece] > 0
-                ) {
-                    current = (current + 1) % 4;
-                    user.pieces[move.piece]--;
-                }
-            } catch (e) {
-                // @ts-ignore
-                console.log("LOOP: error", e.message);
-                error = e;
-                break;
-            }
-        } while (!this.board.gameOver());
+    private processResponse(state?: State, move?: Move) {
+        if (state || !move) {
+            this.error = new Error(`state was transitioned to ${state} and move ${move}`);
+            this.finish();
+            return;
+        }
 
+        if (move.position[0] === -1) {
+            this.inc();
+            this.playRound();
+            return;
+        }
+
+        const user = this.users[this.current];
+        if (
+            this.board.move(this.current, move.piece, move.position) &&
+            user.pieces[move.piece] > 0
+        ) {
+            this.inc();
+            user.pieces[move.piece]--;
+        }
+        this.playRound();
+    }
+
+    private playRound() {
+        if (this.board.gameOver()) {
+            this.finish();
+            return;
+        }
+
+        const user = this.users[this.current];
+        try {
+            user.turn(this.board, this.boundProcessResponse);
+        } catch (e) {
+            this.error = e as Error;
+        }
+    }
+
+    private finish() {
         for (let i = 0; i < this.users.length; ++i) {
-            this.users[i].done(i === this.board.winner && !errored);
+            this.users[i].done(i === this.board.winner && !!this.error);
         }
 
         usersPool.release(this.users);
         boards.release(this.board);
 
-        if (error) {
-            console.log("game errored", this.id, error);
+        if (this.error) {
+            console.log("game errored", this.id, this.error);
         }
 
         if (this.id % 1000 === 0) {
             console.log("game finished", this.id);
         }
+
+        this.cb();
     }
 }

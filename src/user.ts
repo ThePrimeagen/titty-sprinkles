@@ -6,44 +6,21 @@ export type Move = {
     piece: PieceType;
 };
 
-function explodePromise<T>(): {
-    res: (val: T | PromiseLike<T>) => void;
-    rej: (e?: any) => void;
-    promise: Promise<T>;
-} {
-    let res = (_: T | PromiseLike<T>) => {};
-    let rej = (_?: Error) => {};
-    let promise = new Promise<T>((r, e) => {
-        res = r;
-        rej = e;
-    });
-
-    return {
-        promise,
-        rej,
-        res,
-    };
-}
-
 enum MessageType {
     GameStart = "GameStart",
     YourTurn = "YourTurn",
 }
 
-let id = 0;
 export class User {
-    private res?: (val: Move | PromiseLike<Move>) => void;
-    private rej?: (err?: any) => void;
     private socket!: ISocket;
 
     private boundOnStateChange: (prev: State, next: State) => void;
     private boundOnMessage: (msg: string) => void;
-    private _id: number;
+    private turnCb?: (state?: State, move?: Move) => void;
 
     public pieces!: [number, number, number];
 
     constructor() {
-        this._id = id++;
         this.reset();
         this.boundOnStateChange = this.onStateChange.bind(this);
         this.boundOnMessage = this.onMessage.bind(this);
@@ -53,7 +30,7 @@ export class User {
         // this.log("reset");
         // ... something here
         this.pieces = [3, 3, 3];
-        this.res = this.rej = undefined;
+        this.turnCb = undefined;
 
         // else we will get late calls to state change
         if (this.socket) {
@@ -66,13 +43,8 @@ export class User {
 
     private onStateChange(_: State, next: State) {
         // this.log(`onStateChange ${next}`);
-        if (this.res) {
-            if (next === State.Error) {
-                this.reject("socket is errored");
-            }
-            if (next === State.Done) {
-                this.reject(`socket is closed: ${this._id}`);
-            }
+        if (this.turnCb && next !== State.Connected) {
+            this.reject(next);
         }
     }
 
@@ -89,57 +61,48 @@ export class User {
         this.resolve(JSON.parse(msg) as Move);
     }
 
-    async play() {
+    play() {
         //this.log("play");
         // TODO: probably justn have a function on socket
         if (this.socket.state !== State.Connected) {
             throw new Error("Socket isn't connected");
         }
 
-        try {
-            await this.socket.push({
-                type: MessageType.GameStart,
-            });
-        } catch (e) {
-            console.error("user push and broke", e);
-        }
+        this.socket.push({
+            type: MessageType.GameStart,
+        });
     }
 
-    async turn(board: Board): Promise<Move> {
+    turn(board: Board, cb: (state?: State, move?: Move) => void): void  {
         // this.log("turn");
         // TODO: probably justn have a function on socket
         if (this.socket.state !== State.Connected) {
             throw new Error("Socket isn't connected");
         }
 
-        await this.socket.push({
+        this.turnCb = cb;
+        this.socket.push({
             type: MessageType.YourTurn,
             board: board.board,
             user: this.pieces,
         });
-
-        const { res, rej, promise } = explodePromise<Move>();
-        this.res = res;
-        this.rej = rej;
-
-        return promise;
     }
 
     done(isWinner: boolean) {
         this.socket.push(isWinner ? "GIGACHAD" : "L");
     }
 
-    private reject(msg: string) {
-        if (this.rej) {
-            this.rej(msg);
-            this.rej = this.res = undefined;
+    private reject(state: State) {
+        if (this.turnCb) {
+            this.turnCb(state);
+            this.turnCb = undefined;
         }
     }
 
     private resolve(move: Move) {
-        if (this.res) {
-            this.res(move);
-            this.res = this.rej = undefined;
+        if (this.turnCb) {
+            this.turnCb(undefined, move);
+            this.turnCb = undefined;
         }
     }
 }

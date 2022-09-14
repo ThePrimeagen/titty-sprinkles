@@ -15,8 +15,9 @@ const games = new ObjectPool<Game>(() => new Game());
 
 async function play_game(sockets: Sockets): Promise<void> {
     const game = games.get().setSockets(sockets);
-    await game.play();
-    games.release(game);
+    game.play(() => {
+        games.release(game);
+    });
 }
 
 let sockets = new ObjectPool<Socket>(() => new Socket());
