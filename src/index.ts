@@ -3,7 +3,7 @@ import WebSocket from "ws";
 import { ISocket, Socket } from "./socket";
 
 const server = new WebSocket.Server({
-    host: "127.0.0.1",
+    host: "0.0.0.0",
     port: 42010,
 });
 
