@@ -52,8 +52,9 @@ export class Game {
                     user.pieces[move.piece]--;
                 }
             } catch (e) {
-                // @ts-ignore
-                console.log("LOOP: error", e.message);
+                if (e instanceof Error) {
+                    console.log("LOOP: error", e.message, e.stack);
+                }
                 error = e;
                 break;
             }
